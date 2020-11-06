@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="br.com.ithappens.mapper.ProdutoMapper">
+
+    <insert id="insert">
+        INSERT INTO tab_produtos (descricao) VALUES (#{descricao})
+    </insert>
+
+    <insert id="bulkInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="idProduto">
+        insert into tab_produtos (descricao) values
+        <foreach collection="produtos" item="item" index="index" separator=",">
+            ( #{item.descricao})
+        </foreach>
+    </insert>
+
+    <update id="update">
+        UPDATE tab_produtos
+        SET descricao=#{descricao}
+        WHERE id=#{idProduto};
+    </update>
+
+    <select id="findByDescription" resultType="br.com.ithappens.model.Produto">
+        <bind name="pattern" value="'%' + descricao + '%'" />
+        SELECT id as idProduto, descricao FROM tab_produtos WHERE tab_produtos.descricao ilike #{pattern};
+    </select>
+
+    <select id="findById" resultType="br.com.ithappens.model.Produto">
+        SELECT id as idProduto, descricao FROM tab_produtos
+        WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultType="br.com.ithappens.model.Produto">
+        SELECT id as idProduto, descricao FROM tab_produtos
+    </select>
+
+</mapper>

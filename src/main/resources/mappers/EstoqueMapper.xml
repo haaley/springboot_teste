@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="br.com.ithappens.mapper.EstoqueMapper">
+    <insert id="insert"></insert>
+
+    <insert id="insereProdutosEstoque">
+        <foreach collection="produtos" item="item" index="index" separator=";">
+            insert into tab_estoque ( id_filial, id_produto, qtd) values
+            (#{idFilial}, #{item.idProduto}, #{item.quantidade})
+            ON CONFLICT (id_filial, id_produto) DO UPDATE
+            <choose>
+                <when test="tipoPedido == 'ENTRADA'">
+                    SET qtd = tab_estoque.qtd + #{item.quantidade}
+
+                </when>
+                <when test="tipoPedido == 'SAIDA'">
+                    SET qtd = tab_estoque.qtd - #{item.quantidade}
+                </when>
+            </choose>
+            WHERE tab_estoque.id_produto = #{item.idProduto}
+            AND tab_estoque.id_filial = #{idFilial}
+        </foreach>
+    </insert>
+
+    <update id="updateEstoque">
+        UPDATE tab_estoque
+        <choose>
+            <when test="pedido.tipoPedido == 'ENTRADA'">
+                SET qtd = qtd + #{itemPedido.quantidade}
+            </when>
+            <when test="pedido.tipoPedido == 'SAIDA'">
+                SET qtd = qtd - #{itemPedido.quantidade}
+            </when>
+        </choose>
+
+    </update>
+
+    <select id="findByFilial" resultType="br.com.ithappens.model.Produto">
+        select te.id_produto
+        as idProduto, te.qtd as quantidade, tp.descricao
+        from tab_estoque te left join tab_produtos tp on te.id_produto = tp.id
+        where id_filial = #{idFilial}
+    </select>
+    <select id="verificaQuantidade" resultType="java.lang.Long">
+        select qtd from tab_estoque where id_produto = #{idProduto} and id_filial = #{idFilial}
+    </select>
+
+</mapper>
